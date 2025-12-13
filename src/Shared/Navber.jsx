@@ -3,7 +3,10 @@ import UseAuth from "../hooks/UseAuth";
 import { Link } from "react-router";
 
 const Navbar = () => {
-  const { user } = UseAuth();
+  const { user, logOut } = UseAuth();
+  const handleSignOut = () => {
+    logOut();
+  };
 
   // Links
   const beforeLoginLinks = (
@@ -59,9 +62,9 @@ const Navbar = () => {
         </Link>
       </li>
       <li>
-        <Link to="/logout" className="hover:text-red-500">
+        <button onClick={handleSignOut} className="hover:text-red-500">
           Logout
-        </Link>
+        </button>
       </li>
     </>
   ) : (

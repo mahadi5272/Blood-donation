@@ -5,119 +5,128 @@ import UseAuth from "../../hooks/UseAuth";
 import axios from "axios";
 
 const SignIn = () => {
-  const { registerUser } = UseAuth();
+  const { registerUser, updateUserProfile } = UseAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const location = useLocation();
-  //   const navigate = useNavigate();
 
-  const handleRegistration = (data) => {
-    console.log("after register", data);
-    const profileImage = data.photo[0];
-    registerUser(data.email, data.password)
-      .then((result) => {
-        console.log(result.user);
-        // 1.store the image in forms data
-        const formData = new FormData();
-        formData.append("image", profileImage);
-        // 2. send the image to store and get the ul
-        const image_API_URL = `https://api.imgbb.com/1/upload?key= ${
-          import.meta.env.VITE_image_host_key
-        }`;
+  const handleRegistration = async (data) => {
+    try {
+      // 1️⃣ Firebase Register
+      await registerUser(data.email, data.password);
 
-        axios.post(image_API_URL, formData).then((res) => {
-          console.log(res);
-          const photoURL = res.data.data.url;
-          // create user profile
-          const userInfo = {
-            email: data.email,
-            displayName: data.name,
-            photoURL: photoURL,
-          };
-        });
-      })
-      .catch((error) => {
-        console.log(error.message);
+      // 2️⃣ Upload image to ImageBB
+      const formData = new FormData();
+      formData.append("image", data.photo[0]);
+
+      const image_API_URL = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host_key}`;
+      const imageRes = await axios.post(image_API_URL, formData);
+      const photoURL = imageRes.data.data.url;
+
+      // 3️⃣ Update Firebase Profile
+      await updateUserProfile({
+        displayName: data.name,
+        photoURL,
       });
+
+      // 4️⃣ Save user to MongoDB
+      const userInfo = {
+        name: data.name,
+        email: data.email,
+        avatar: photoURL,
+        bloodGroup: data.bloodGroup,
+        district: data.district,
+        upazila: data.upazila,
+        role: "donor",
+        status: "active",
+      };
+
+      await axios.post("https://your-server-url/users", userInfo);
+
+      navigate(location.state?.from || "/dashboard");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <div className="card bg-base-100 w-full mx-auto max-w-sm shrink-0 shadow-2xl">
+    <div className="card bg-base-100 w-full mx-auto max-w-sm shadow-2xl">
       <form className="card-body" onSubmit={handleSubmit(handleRegistration)}>
         <fieldset className="fieldset">
-          {/* name field */}
+
+          {/* Name */}
           <label className="label">Name</label>
           <input
             type="text"
             {...register("name", { required: true })}
             className="input"
-            placeholder="Your Name"
           />
-          {errors.name?.type === "required" && (
-            <p className="text-red-500">Name is required.</p>
-          )}
+          {errors.name && <p className="text-red-500">Name is required</p>}
 
-          {/* photo image field */}
+          {/* Photo */}
           <label className="label">Photo</label>
-
           <input
             type="file"
             {...register("photo", { required: true })}
             className="file-input"
-            placeholder="Your Photo"
+          />
+          {errors.photo && <p className="text-red-500">Photo is required</p>}
+
+          {/* Blood Group */}
+          <label className="label">Blood Group</label>
+          <select {...register("bloodGroup", { required: true })} className="select">
+            <option value="">Select Blood Group</option>
+            {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(bg => (
+              <option key={bg} value={bg}>{bg}</option>
+            ))}
+          </select>
+
+          {/* District */}
+          <label className="label">District</label>
+          <input
+            type="text"
+            {...register("district", { required: true })}
+            className="input"
           />
 
-          {errors.name?.type === "required" && (
-            <p className="text-red-500">Photo is required.</p>
-          )}
+          {/* Upazila */}
+          <label className="label">Upazila</label>
+          <input
+            type="text"
+            {...register("upazila", { required: true })}
+            className="input"
+          />
 
-          {/* email field */}
+          {/* Email */}
           <label className="label">Email</label>
           <input
             type="email"
             {...register("email", { required: true })}
             className="input"
-            placeholder="Email"
           />
-          {errors.email?.type === "required" && (
-            <p className="text-red-500">Email is required.</p>
-          )}
 
-          {/* password */}
+          {/* Password */}
           <label className="label">Password</label>
           <input
             type="password"
-            {...register("password", {
-              required: true,
-              minLength: 6,
-            })}
+            {...register("password", { required: true, minLength: 6 })}
             className="input"
-            placeholder="Password"
           />
-          {errors.password?.type === "required" && (
-            <p className="text-red-500">Password is required.</p>
-          )}
           {errors.password?.type === "minLength" && (
-            <p className="text-red-500">
-              Password must be 6 characters or longer
-            </p>
+            <p className="text-red-500">Password must be 6 characters</p>
           )}
 
-          <div>
-            <a className="link link-hover">Forgot password?</a>
-          </div>
           <button className="btn btn-neutral mt-4">Register</button>
         </fieldset>
-        <p>
-          Already have an account{" "}
-          <Link
-            state={location.state}
-            className="text-blue-400 underline"
-            to="/login"
-          >
+
+        <p className="text-center">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-500 underline">
             Login
           </Link>
         </p>
