@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import UseAuth from "../../hooks/UseAuth";
+import UseAxiosSecure from "../../hooks/UseAxiosSecure";
 const Profile = () => {
   const { user } = UseAuth();
   const axiosSecure = UseAxiosSecure();
