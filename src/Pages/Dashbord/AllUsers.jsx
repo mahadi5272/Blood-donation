@@ -1,6 +1,40 @@
 import React from "react";
+import   { useEffect, useState } from "react";
+import UseAxiosSecure from "../../hooks/UseAxiosSecure";
+import { HiOutlineDotsVertical } from "react-icons/hi";
 
 const AllUsers = () => {
+    const [users, setusers] = useState([]);
+  const axiosSecure = UseAxiosSecure();
+  const fecthUser = () => {
+    axiosSecure.get("/users").then((res) => {
+      setusers(res.data);
+    });
+  };
+  console.log(users);
+  useEffect(() => {
+    fecthUser();
+  }, [axiosSecure]);
+  const handleStatusChange = (email, status) => {
+    // Implement the logic to update user status
+    axiosSecure
+      .patch(`/update/user/status?email=${email}&status=${status}`)
+      .then((res) => {
+        console.log(res.data);
+        fecthUser();
+      });
+  };
+  const handleRoleChange = (email, role) => {
+    axiosSecure
+      .patch(`/update/user/role?email=${email}&role=${role}`)
+      .then((res) => {
+        console.log("Role updated:", res.data);
+        fecthUser(); // UI refresh
+      })
+      .catch((err) => {
+        console.error("Role update failed:", err);
+      });
+    }
   return (
     <div>
       <div className="overflow-x-auto">
