@@ -1,6 +1,33 @@
 import React from "react";
 
 const MyRequest = () => {
+  const [totalRequest, setTotalRequest] = useState(0);
+  const [MyRequest, setmyRequest] = useState([]);
+  const [itemParPage, setItemParPage] = useState(10);
+  const [currerntPage, setCurrerntPage] = useState(1);
+  const axiosSecure = UseAxiosSecure();
+
+  useEffect(() => {
+    axiosSecure
+      .get(`/my-request?page=${currerntPage - 1} size=${itemParPage}`)
+      .then((res) => {
+        setmyRequest(res.data.request);
+        setTotalRequest(res.data.totalReqest);
+      });
+  }, [axiosSecure, currerntPage, itemParPage]);
+  const numberOfPage = Math.ceil(totalRequest / itemParPage);
+  const pages = [...Array(numberOfPage).keys()].map((e) => e + 1);
+
+  const handlePrev = () => {
+    if (currerntPage > 1) {
+      setCurrerntPage(currerntPage + 1);
+    }
+  };
+  const handleNext = () => {
+    if (currerntPage < pages.length) {
+      setCurrerntPage(currerntPage + 1);
+    }
+  };
   return (
     <div>
       <div className="overflow-x-auto">
