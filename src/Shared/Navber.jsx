@@ -57,7 +57,7 @@ const Navbar = () => {
   const authLinks = user ? (
     <>
       <li>
-        <Link to="/dashboard" className="hover:text-red-500">
+        <Link to="/dashbord-layout" className="hover:text-red-500">
           Dashboard
         </Link>
       </li>
@@ -118,6 +118,13 @@ const Navbar = () => {
         <ul className="menu menu-horizontal px-1 font-medium text-gray-700">
           {user ? beforeLoginLinks : afterLoginLinks}
         </ul>
+        <div>
+          {user && (<img
+            className="w-10 h-10 rounded-full ml-4"
+            src={user.photoURL}
+            alt="User Avatar"
+          />)}
+        </div>
       </div>
 
       {/* Navbar End */}

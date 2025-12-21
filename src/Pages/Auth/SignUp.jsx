@@ -1,14 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router";
 import UseAuth from "../../hooks/UseAuth";
 import axios from "axios";
-
-const SignIn = () => {
+import UseAxiosSecure from "../../hooks/UseAxiosSecure";
+import UseAxios from "../../hooks/UseAxios";
+const SignUp = () => {
+  const [upazilas, setupazilas] = useState([]);
+  const [districts, setdistricts] = useState([]);
   const { registerUser, updateUserProfile } = UseAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const axiosInstance = UseAxios();
+  useEffect(() => {
+    axios.get("/districts.json").then((res) => {
+      console.log(res);
+      setdistricts(res.data.districts);
+    });
+    axios.get("/upazilas.json").then((res) => {
+      console.log(res);
+      setupazilas(res.data.upazilas);
+    });
+  }, []);
   const {
     register,
     handleSubmit,
@@ -24,15 +37,11 @@ const SignIn = () => {
       const formData = new FormData();
       formData.append("image", data.photo[0]);
 
-      const image_API_URL = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_host_key}`;
+      const image_API_URL = `https://api.imgbb.com/1/upload?key=${
+        import.meta.env.VITE_image_host_key
+      }`;
       const imageRes = await axios.post(image_API_URL, formData);
       const photoURL = imageRes.data.data.url;
-
-      // 3️⃣ Update Firebase Profile
-      await updateUserProfile({
-        displayName: data.name,
-        photoURL,
-      });
 
       // 4️⃣ Save user to MongoDB
       const userInfo = {
@@ -42,13 +51,17 @@ const SignIn = () => {
         bloodGroup: data.bloodGroup,
         district: data.district,
         upazila: data.upazila,
-        role: "donor",
-        status: "active",
       };
+      console.log(userInfo);
 
-      await axios.post("https://your-server-url/users", userInfo);
+      await axiosInstance.post("/users", userInfo);
 
-      navigate(location.state?.from || "/dashboard");
+      navigate(location.state?.from || "/");
+      // 3️⃣ Update Firebase Profile
+      await updateUserProfile({
+        displayName: data.name,
+        photoURL,
+      });
     } catch (error) {
       console.error(error);
     }
@@ -58,7 +71,6 @@ const SignIn = () => {
     <div className="card bg-base-100 w-full mx-auto max-w-sm shadow-2xl">
       <form className="card-body" onSubmit={handleSubmit(handleRegistration)}>
         <fieldset className="fieldset">
-
           {/* Name */}
           <label className="label">Name</label>
           <input
@@ -79,28 +91,43 @@ const SignIn = () => {
 
           {/* Blood Group */}
           <label className="label">Blood Group</label>
-          <select {...register("bloodGroup", { required: true })} className="select">
+          <select
+            {...register("bloodGroup", { required: true })}
+            className="select"
+          >
             <option value="">Select Blood Group</option>
-            {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(bg => (
-              <option key={bg} value={bg}>{bg}</option>
+            {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+              <option key={bg} value={bg}>
+                {bg}
+              </option>
             ))}
           </select>
 
           {/* District */}
           <label className="label">District</label>
-          <input
-            type="text"
+          <select
             {...register("district", { required: true })}
-            className="input"
-          />
+            className="select"
+          >
+            {districts.map((district) => (
+              <option key={district.id} value={district.name}>
+                {district.name}
+              </option>
+            ))}
+          </select>
 
           {/* Upazila */}
           <label className="label">Upazila</label>
-          <input
-            type="text"
+          <select
             {...register("upazila", { required: true })}
-            className="input"
-          />
+            className="select"
+          >
+            {upazilas.map((upazila) => (
+              <option key={upazila.id} value={upazila.name}>
+                {upazila.name}
+              </option>
+            ))}
+          </select>
 
           {/* Email */}
           <label className="label">Email</label>
@@ -135,4 +162,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

@@ -1,40 +1,89 @@
-import React from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import UseAxios from "../hooks/UseAxios";
 
 const Search = () => {
+  const [upazilas, setupazilas] = useState([]);
+  const [districts, setdistricts] = useState([]);
+  const { register, handleSubmit } = useForm();
+  const axiosInstance = UseAxios();
+
+  useEffect(() => {
+    axios.get("/districts.json").then((res) => {
+      console.log(res);
+      setdistricts(res.data.districts);
+    });
+    axios.get("/upazilas.json").then((res) => {
+      console.log(res);
+      setupazilas(res.data.upazilas);
+    });
+  }, []);
+  const handleSearch = (data) => {
+    console.log("form data:", data); // debug
+
+    axiosInstance
+      .get("/search-req", {
+        params: {
+          bloodGroup: data.bloodGroup,
+          district: data.district,
+          upazila: data.upazila,
+        },
+      })
+      .then((res) => {
+        console.log("response:", res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
   return (
     <div>
       {/* search */}
       <section>
         <div>
-          <form className="bg-white shadow-lg rounded-lg p-6 mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <form
+            onSubmit={handleSubmit(handleSearch)}
+            className="bg-white shadow-lg rounded-lg p-6 mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
             {/* Blood Group */}
-            <select className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-red-500">
+            <label className="label">Blood Group</label>
+            <select
+              {...register("bloodGroup", { required: true })}
+              className="select"
+            >
               <option value="">Select Blood Group</option>
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="B-">B-</option>
-              <option value="AB+">AB+</option>
-              <option value="AB-">AB-</option>
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
+              {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((bg) => (
+                <option key={bg} value={bg}>
+                  {bg}
+                </option>
+              ))}
             </select>
 
             {/* District */}
-            <select className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-red-500">
-              <option value="">Select District</option>
-              <option value="Dhaka">Dhaka</option>
-              <option value="Chittagong">Chittagong</option>
-              <option value="Sylhet">Sylhet</option>
-              <option value="Khulna">Khulna</option>
+            <label className="label">District</label>
+            <select
+              {...register("district", { required: true })}
+              className="select"
+            >
+              {districts.map((district) => (
+                <option key={district.id} value={district.name}>
+                  {district.name}
+                </option>
+              ))}
             </select>
 
             {/* Upazila */}
-            <select className="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:border-red-500">
-              <option value="">Select Upazila</option>
-              <option value="Dhanmondi">Dhanmondi</option>
-              <option value="Gulshan">Gulshan</option>
-              <option value="Mirpur">Mirpur</option>
+            <label className="label">Upazila</label>
+            <select
+              {...register("upazila", { required: true })}
+              className="select"
+            >
+              {upazilas.map((upazila) => (
+                <option key={upazila.id} value={upazila.name}>
+                  {upazila.name}
+                </option>
+              ))}
             </select>
 
             {/* Search Button */}
