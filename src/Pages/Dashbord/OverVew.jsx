@@ -1,6 +1,26 @@
 import React from "react";
 
 const OverVew = () => {
+  const { user } = UseAuth();
+  const axiosSecure = UseAxiosSecure();
+
+  // Beginner-friendly state
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalRequests, setTotalRequests] = useState(0);
+  const [totalFunds, setTotalFunds] = useState(0);
+
+  // Load data from server
+  useEffect(() => {
+    axiosSecure
+      .get("/dashboard/overview")
+      .then((res) => {
+        // Server থেকে data fetch করে state update করা
+        setTotalUsers(res.data.totalUsers);
+        setTotalRequests(res.data.totalRequests);
+        setTotalFunds(res.data.totalFunds);
+      })
+      .catch((err) => console.log(err));
+  }, [axiosSecure]);
   return (
     <div className="max-w-4xl mx-auto p-5">
       <h1 className="text-2xl font-bold mb-5">
