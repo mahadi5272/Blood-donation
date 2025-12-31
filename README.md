@@ -1,16 +1,166 @@
-# React + Vite
+# 🩸 Blood Donation Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack MERN-based Blood Donation Management System where users can request blood, donors can respond, volunteers can manage requests, and admins can control the system.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Live Links
+- Client: https://willowy-semolina-f77345.netlify.app/
+- Server: https://blood-donation-server-ivory.vercel.app/
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🧩 Features Overview
 
-## Expanding the ESLint configuration
+### 🔐 Authentication
+- Email & Password login
+- Role-based access control
+- Roles:
+  - User
+  - Volunteer
+  - Admin
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 👤 User Features
+- Create blood donation requests
+- View own donation requests
+- See request status (pending / inprogress / done)
+- Cannot change donation status
+
+---
+
+## 🧑‍⚕️ Volunteer Features
+- View all blood donation requests
+- Update donation status:
+  - pending → inprogress → done
+- Cannot delete or edit requests
+- Cannot manage users
+
+---
+
+## 🛡️ Admin Features
+- View all donation requests
+- Update donation status
+- Manage users
+  - Change role (user / volunteer / admin)
+  - Activate / deactivate users
+- Dashboard statistics
+
+---
+
+## 🩸 Donation Status Flow
+
+
+---
+
+## 📄 Pages & Routes
+
+### Public Routes
+- `/` → Home
+- `/login`
+- `/register`
+- `/search-donor`
+
+### Private Routes
+- `/dashboard`
+- `/dashboard/add-request`
+- `/dashboard/my-requests`
+- `/dashboard/request/:id` (Donation Details Page)
+
+### Role Based Routes
+- `/dashboard/all-requests` → Admin & Volunteer
+- `/dashboard/users` → Admin only
+
+---
+
+## 📌 Donation Request Details Page (Private 🔒)
+
+### Description
+This page displays **all information provided during donation request creation**.
+
+### UI Flow
+1. Show request details
+2. Show **Donate Button**
+3. Clicking button opens a modal
+4. Modal contains a form
+5. Confirming donation updates status
+
+### Modal Form Fields
+- Donor Name (Read Only – logged in user)
+- Donor Email (Read Only – logged in user)
+
+### On Confirm
+- donationStatus changes from `pending` → `inprogress`
+- donorName and donorEmail are saved
+
+---
+
+## 🗃️ Database Collections
+
+### Users Collection
+```json
+{
+  "_id": "ObjectId",
+  "name": "string",
+  "email": "string",
+  "avatar": "string",
+  "bloodGroup": "string",
+  "district": "string",
+  "upazila": "string",
+  "role": "user | volunteer | admin",
+  "status": "Active | Blocked",
+  "createdAt": "date"
+}
+{
+  "_id": "ObjectId",
+  "requesterName": "string",
+  "requesterEmail": "string",
+  "recipientName": "string",
+  "recipientDistrict": "string",
+  "recipientUpazila": "string",
+  "hospitalName": "string",
+  "fullAddress": "string",
+  "bloodGroup": "string",
+  "donationDate": "string",
+  "donationTime": "string",
+  "requestMessage": "string",
+  "donationStatus": "pending | inprogress | done",
+  "donorName": "string",
+  "donorEmail": "string",
+  "createdAt": "date"
+}
+### Technology Stack
+Client
+
+React
+
+React Router
+
+Tailwind CSS
+
+Axios
+
+Firebase Authentication
+
+Server
+
+Node.js
+
+Express.js
+
+MongoDB
+
+JWT
+
+CORS
+
+dotenv
+
+🔐 Security
+
+JWT protected routes
+
+Role-based middleware
+
+Private & Admin routes secured
